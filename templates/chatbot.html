@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!-- <link rel="stylesheet" href="{{ url_for('static', filename='/css/chatbot.css') }}" type="text/css"> -->
+  <link rel="stylesheet" type="text/css" href="../static/css/chatbot.css">
+
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+  <section class="msger">
+    <header class="msger-header">
+      <div class="msger-header-title">
+        <i class="fas fa-bug"></i> RaSa By NeXicon <i class="fas fa-bug"></i>
+      </div>
+    </header>
+    <main class="msger-chat">
+      <div class="msg left-msg">
+        <div class="msg-img" style="background-image: url(https://png.pngtree.com/png-vector/20220622/ourlarge/pngtree-chatbot-color-icon-chat-bot-png-image_5256697.png)"></div>
+        <div class="msg-bubble">
+          <div class="msg-info">
+            <div class="msg-info-name">RaSa</div>
+            <div class="msg-info-time"></div>
+          </div>
+          <div class="msg-text">
+            Hai, selamat datang di RaSa! Yuk silakan bertanya apa saja tapi hanya seputar makanan aja yah! 😄
+          </div>
+        </div>
+      </div>
+    </main>
+    <form class="msger-inputarea" id="chatbot-form">
+      <input type="text" class="msger-input" id="textInput" placeholder="Ketikkan yang kamu cari...">
+      <button type="submit" class="msger-send-btn">Kirim</button>
+    </form>
+  </section>
+  <script src='https://use.fontawesome.com/releases/v5.0.13/js/all.js'></script>
+  <script>
+    $(document).ready(function() {
+      // Handle form submission
+      $("#chatbot-form").submit(function(event) {
+        event.preventDefault();
+        var userInput = $("#textInput").val();
+        if (userInput.trim() !== "") {
+          appendMessage("Kamu", "https://vectorified.com/images/icon-girl-16.png", "right", userInput);
+          $("#textInput").val("");
+          getBotResponse(userInput);
+        }
+      });
+
+      // Append message to the chat window
+      function appendMessage(name, img, side, text) {
+        var msgHTML = `
+        <div class="msg ${side}-msg">
+          <div class="msg-img" style="background-image: url(${img})"></div>
+          <div class="msg-bubble">
+            <div class="msg-info">
+              <div class="msg-info-name">${name}</div>
+              <div class="msg-info-time">${formatDate(new Date())}</div>
+            </div>
+            <div class="msg-text">${text}</div>
+          </div>
+        </div>
+        `;
+        $(".msger-chat").append(msgHTML);
+        scrollToBottom();
+      }
+
+      // Scroll to the bottom of the chat window
+      function scrollToBottom() {
+        $(".msger-chat").scrollTop($(".msger-chat")[0].scrollHeight);
+      }
+
+      // Format the date
+      function formatDate(date) {
+        var h = "0" + date.getHours();
+        var m = "0" + date.getMinutes();
+        return `${h.slice(-2)}:${m.slice(-2)}`;
+      }
+
+      // Get response from the bot
+      function getBotResponse(userInput) {
+        $.get("/get", { msg: userInput }).done(function (data) {
+    var botResponse = data.response;
+    var choices = data.choices;
+    var datasetResponses = data.dataset_responses;
+
+    if (botResponse && botResponse !== userInput) {
+        appendMessage("RaSa", "https://png.pngtree.com/png-vector/20220622/ourlarge/pngtree-chatbot-color-icon-chat-bot-png-image_5256697.png", "left", botResponse);
+    }
+
+    if (choices && choices.length > 0) {
+        var choicesText = "Pilihan:\n";
+        for (var i = 0; i < choices.length; i++) {
+            appendMessage("RaSa", "https://png.pngtree.com/png-vector/20220622/ourlarge/pngtree-chatbot-color-icon-chat-bot-png-image_5256697.png", "left", " " + choices[i]);
+        }
+    }
+
+    if (datasetResponses && datasetResponses.length > 0) {
+        for (var j = 0; j < datasetResponses.length; j++) {
+            appendMessage("Dataset", "https://example.com/dataset-avatar.png", "left", datasetResponses[j]);
+        }
+    }
+});
+
+}
+
+    });
+  </script>
+</body>
+</html>
